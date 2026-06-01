@@ -70,16 +70,94 @@ In advanced stages, the focus shifts to improving query performance. Some optimi
 
 ### Easy Level
 1. Retrieve the names of all tracks that have more than 1 billion streams.
+   
+```sql
+   SELECT * FROM spotify
+ where stream > 1000000000;
+```
+
 2. List all albums along with their respective artists.
+
+```sql
+    SELECT DISTINCT album, artist from spotify;
+```
+
 3. Get the total number of comments for tracks where `licensed = TRUE`.
+
+```sql
+    SELECT SUM(comments) as total_comments from spotify 
+ WHERE licensed = 'TRUE';
+```
+
 4. Find all tracks that belong to the album type `single`.
+
+```sql
+ SELECT track from spotify
+ where album_type ='single';
+```
+
 5. Count the total number of tracks by each artist.
+
+```sql 
+  SELECT 
+  artist, ---1
+   COUNT(*) as total_no_of_tracks ---2
+   from spotify
+   GROUP BY artist
+   order by 2 desc;
+```
 
 ### Medium Level
 1. Calculate the average danceability of tracks in each album.
+
+```sql
+  SELECT * FROM spotify;
+
+SELECT 
+    album,
+    avg(danceability) as average_danceability
+
+from spotify
+GROUP BY 1;
+```
+
 2. Find the top 5 tracks with the highest energy values.
+
+```sql
+SELECT
+   track,
+   MAX(energy) from spotify
+
+group by 1
+order by 2 desc
+limit 5;
+```
+
 3. List all tracks along with their views and likes where `official_video = TRUE`.
+
+```sql
+  SELECT 
+  track,
+  sum(views) as total_views,
+  sum(likes) as total_likes
+  
+  from spotify
+  where official_video = 'true'
+  group by 1 
+  order by 2 desc;
+```
+
 4. For each album, calculate the total views of all associated tracks.
+
+```sql
+  select 
+  album,
+  track,
+  sum(views)
+  from spotify
+  group by 1, 2;
+```
+
 5. Retrieve the track names that have been streamed on Spotify more than YouTube.
    ```sql
    SELECT * FROM
@@ -100,7 +178,36 @@ In advanced stages, the focus shifts to improving query performance. Some optimi
 
 ### Advanced Level
 1. Find the top 3 most-viewed tracks for each artist using window functions.
+
+```sql
+WITH ranking_artist
+AS
+
+(SELECT 
+  artist,
+  track,
+  SUM(views) as total_views,
+  DENSE_RANK() OVER(partition by artist ORDER BY SUM(views) DESC) as rank
+  
+  from spotify
+  group by 1, 2 
+  order by 1, 3 desc
+)
+SELECT * FROM ranking_artist
+WHERE rank <= 3;
+```
+
 2. Write a query to find tracks where the liveness score is above the average.
+
+```sql
+  
+SELECT * FROM spotify
+WHERE liveness > (SELECT AVG(liveness) FROM spotify)
+
+SELECT AVG(liveness) FROM spotify -- 0.19
+-- instead of using hard numeric value you can directly use the subquery
+```
+
 3. **Use a `WITH` clause to calculate the difference between the highest and lowest energy values for tracks in each album.**
 ```sql
 WITH cte
@@ -119,8 +226,29 @@ FROM cte
 ORDER BY 2 DESC
 ```
    
-5. Find tracks where the energy-to-liveness ratio is greater than 1.2.
-6. Calculate the cumulative sum of likes for tracks ordered by the number of views, using window functions.
+4. Find tracks where the energy-to-liveness ratio is greater than 1.2.
+
+```sql
+SELECT
+    track,
+    energy,
+    liveness,
+    energy / liveness AS energy_liveness_ratio
+FROM spotify
+WHERE liveness > 0
+  AND energy / liveness > 1.2;
+```
+
+5. Calculate the cumulative sum of likes for tracks ordered by the number of views, using window functions.
+
+   ```sql
+      SELECT
+    track,
+    views,
+    likes,
+    SUM(likes) OVER (ORDER BY views DESC) AS cumulative_likes
+FROM spotify;
+   ```
 
 
 Here’s an updated section for your **Spotify Advanced SQL Project and Query Optimization** README, focusing on the query optimization task you performed. You can include the specific screenshots and graphs as described.
@@ -185,7 +313,7 @@ This optimization shows how indexing can drastically reduce query time, improvin
 ---
 
 ## Contributing
-If you would like to contribute to this project, feel free to fork the repository, submit pull requests, or raise issues.
+If you would like to contribute to this project, feel free to work with the repository, submit pull requests, or raise issues.
 
 ---
 
