@@ -82,21 +82,21 @@ In advanced stages, the focus shifts to improving query performance. Some optimi
 4. For each album, calculate the total views of all associated tracks.
 5. Retrieve the track names that have been streamed on Spotify more than YouTube.
    ```sql
-SELECT * FROM
-(SELECT 
-  track,
-  --most played on,
-  COALESCE(SUM(CASE WHEN most_played_on = 'Youtube' THEN stream END),0) as streamed_on_youtube,
-  COALESCE(SUM(CASE WHEN most_played_on = 'Spotify' THEN stream END),0) as streamd_on_spotify
-  from spotify
-  GROUP BY 1
-  ) as t1
+   SELECT * FROM
+   (SELECT 
+   track,
+   --most played on,
+   COALESCE(SUM(CASE WHEN most_played_on = 'Youtube' THEN stream END),0) as streamed_on_youtube,
+   COALESCE(SUM(CASE WHEN most_played_on = 'Spotify' THEN stream END),0) as streamd_on_spotify
+   from spotify
+   GROUP BY 1
+   ) as t1
   
-  WHERE 
-  streamd_on_spotify > streamed_on_youtube
-  AND 
-  streamed_on_youtube <> 0;
-   ```
+   WHERE 
+   streamd_on_spotify > streamed_on_youtube
+   AND 
+   streamed_on_youtube <> 0;
+  ```
 
 ### Advanced Level
 1. Find the top 3 most-viewed tracks for each artist using window functions.
